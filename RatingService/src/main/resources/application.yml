@@ -1,0 +1,7 @@
+server:
+  port: 8083
+
+spring:
+  data:
+    mongodb:
+      uri: mongodb+srv://mongodb:root@cluster-0.ccexft8.mongodb.net/microservice?retryWrites=true&w=majority
