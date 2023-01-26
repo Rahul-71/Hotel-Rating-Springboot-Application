@@ -1,6 +1,5 @@
 package com.hotelmanagement.user.service.services.impl;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -15,6 +14,8 @@ import com.hotelmanagement.user.service.entities.Hotel;
 import com.hotelmanagement.user.service.entities.Rating;
 import com.hotelmanagement.user.service.entities.User;
 import com.hotelmanagement.user.service.exceptions.ResourceNotFoundExceptions;
+import com.hotelmanagement.user.service.external.services.HotelService;
+import com.hotelmanagement.user.service.external.services.RatingService;
 import com.hotelmanagement.user.service.repositories.UserRepository;
 import com.hotelmanagement.user.service.services.UserService;
 
@@ -24,7 +25,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private RestTemplate restTemplate;
+    private HotelService hotelService;
+    @Autowired
+    private RatingService ratingService;
     // @Autowired
     private Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
@@ -42,7 +45,29 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getAllUsers() {
         // to get all the user present into db
-        return this.userRepository.findAll();
+        List<User> allUsers = this.userRepository.findAll();
+
+        allUsers = allUsers.stream().map(user -> {
+            // fetch rating details from RATING-SERVICE
+            List<Rating> ratingByUserID = this.ratingService.getRatingByUserID(user.getUserId());
+            
+            // fetch hotel info for each rating
+            ratingByUserID = ratingByUserID.stream().map(rating -> {
+            
+                // get hotel info using HOTEL-SERVICE
+                Hotel hotel = this.hotelService.getHotelById(rating.getHotelId());
+                rating.setHotel(hotel);
+
+                return rating;
+            }).collect(Collectors.toList());
+
+            // setting rating list to user
+            user.setRatings(ratingByUserID);
+
+            return user;
+        }).collect(Collectors.toList());
+
+        return allUsers;
     }
 
     @Override
@@ -51,20 +76,19 @@ public class UserServiceImpl implements UserService {
         User user = this.userRepository.findById(userId).orElseThrow(
                 () -> new ResourceNotFoundExceptions("User with given id: " + userId + " not found!!"));
 
-        // fetch rating of the above user from RATING-SERVICE
-        // http://localhost:8083/ratings/users/d4af178c-5438-4670-bf42-f6ff17e90c23
-        Rating[] ratingArray = this.restTemplate.getForObject(
-                "http://RATING-SERVICE/ratings/users/" + user.getUserId(),
-                Rating[].class);
+        // // fetch rating of the above user from RATING-SERVICE
+        // // http://localhost:8083/ratings/users/d4af178c-5438-4670-bf42-f6ff17e90c23
+        // Rating[] ratingArray = this.restTemplate.getForObject(
+        // "http://RATING-SERVICE/ratings/users/" + user.getUserId(),
+        // Rating[].class);
 
-        List<Rating> userRatings = Arrays.stream(ratingArray).toList();
+        List<Rating> userRatings = this.ratingService.getRatingByUserID(userId);
+
+        // List<Rating> userRatings = Arrays.stream(ratingArray).toList();
 
         List<Rating> ratings = userRatings.stream().map(rating -> {
             // api call to hotel service
-            // http://localhost:8082/hotels/ae25f673-b728-4c5e-961b-f32750540b12
-            Hotel hotel = this.restTemplate
-                    .getForObject("http://HOTEL-SERVICE/hotels/" + rating.getHotelId(), Hotel.class);
-
+            Hotel hotel = this.hotelService.getHotelById(rating.getHotelId());
             // set hotel to rating
             rating.setHotel(hotel);
             return rating;
