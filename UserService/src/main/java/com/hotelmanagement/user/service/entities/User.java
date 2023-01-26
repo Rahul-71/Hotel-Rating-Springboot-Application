@@ -1,5 +1,6 @@
 package com.hotelmanagement.user.service.entities;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -36,5 +37,5 @@ public class User {
     private String about;
 
     @Transient // not storing rating to user table
-    private List<Rating> ratings;
+    private List<Rating> ratings = new ArrayList<>();
 }
