@@ -6,7 +6,6 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hotelmanagement.user.service.entities.User;
 import com.hotelmanagement.user.service.exceptions.ResourceNotFoundExceptions;
 import com.hotelmanagement.user.service.repositories.UserRepository;
