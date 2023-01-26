@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
         // fetch rating of the above user from RATING-SERVICE
         // http://localhost:8083/ratings/users/d4af178c-5438-4670-bf42-f6ff17e90c23
         Rating[] ratingArray = this.restTemplate.getForObject(
-                "http://localhost:8083/ratings/users/" + user.getUserId(),
+                "http://RATING-SERVICE/ratings/users/" + user.getUserId(),
                 Rating[].class);
 
         List<Rating> userRatings = Arrays.stream(ratingArray).toList();
@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
             // api call to hotel service
             // http://localhost:8082/hotels/ae25f673-b728-4c5e-961b-f32750540b12
             Hotel hotel = this.restTemplate
-                    .getForObject("http://localhost:8082/hotels/" + rating.getHotelId(), Hotel.class);
+                    .getForObject("http://HOTEL-SERVICE/hotels/" + rating.getHotelId(), Hotel.class);
 
             // set hotel to rating
             rating.setHotel(hotel);
