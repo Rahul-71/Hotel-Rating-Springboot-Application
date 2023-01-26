@@ -7,7 +7,6 @@ spring:
     username: root
     password: root
 
-
   
   jpa:
     hibernate:
@@ -20,11 +19,15 @@ spring:
   application:
     name: USER-SERVICE
 
-eureka:
-  instance:
-    prefer-ip-address: true
-  client:
-    fetch-registry: true
-    register-with-eureka: true
-    service-url:
-      defaulZone: http://localhost:8761/eureka
+  config:
+    import: optional:configserver:http://localhost:8085
+
+
+# eureka:
+#   instance:
+#     prefer-ip-address: true
+#   client:
+#     fetch-registry: true
+#     register-with-eureka: true
+#     service-url:
+#       defaulZone: http://localhost:8761/eureka
