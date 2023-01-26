@@ -50,10 +50,10 @@ public class UserServiceImpl implements UserService {
         allUsers = allUsers.stream().map(user -> {
             // fetch rating details from RATING-SERVICE
             List<Rating> ratingByUserID = this.ratingService.getRatingByUserID(user.getUserId());
-            
+
             // fetch hotel info for each rating
             ratingByUserID = ratingByUserID.stream().map(rating -> {
-            
+
                 // get hotel info using HOTEL-SERVICE
                 Hotel hotel = this.hotelService.getHotelById(rating.getHotelId());
                 rating.setHotel(hotel);
@@ -76,12 +76,7 @@ public class UserServiceImpl implements UserService {
         User user = this.userRepository.findById(userId).orElseThrow(
                 () -> new ResourceNotFoundExceptions("User with given id: " + userId + " not found!!"));
 
-        // // fetch rating of the above user from RATING-SERVICE
-        // // http://localhost:8083/ratings/users/d4af178c-5438-4670-bf42-f6ff17e90c23
-        // Rating[] ratingArray = this.restTemplate.getForObject(
-        // "http://RATING-SERVICE/ratings/users/" + user.getUserId(),
-        // Rating[].class);
-
+        // fetch rating of the above user from RATING-SERVICE
         List<Rating> userRatings = this.ratingService.getRatingByUserID(userId);
 
         // List<Rating> userRatings = Arrays.stream(ratingArray).toList();
